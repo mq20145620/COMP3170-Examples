@@ -1,16 +1,27 @@
 package comp3170;
 
+import java.awt.HeadlessException;
+
 import javax.swing.JFrame;
 
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
+import com.jogamp.opengl.awt.GLCanvas;
 
 
 public class Example1 extends JFrame implements GLEventListener {
 
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
+	private GLCanvas myCanvas;
+	
+	public Example1() throws HeadlessException {
+		super("Example 1");
+		
+		setSize(600,400);
+		myCanvas = new GLCanvas();
+		myCanvas.addGLEventListener(this);
+		
+		this.add(myCanvas);
+		this.setVisible(true);
 	}
 
 	@Override
@@ -35,6 +46,10 @@ public class Example1 extends JFrame implements GLEventListener {
 	public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	public static void main(String[] args) {
+		new Example1();
 	}
 
 }
