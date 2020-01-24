@@ -1,7 +1,5 @@
 package comp3170;
 
-import java.awt.HeadlessException;
-
 import javax.swing.JFrame;
 
 import com.jogamp.opengl.GLAutoDrawable;
@@ -13,7 +11,7 @@ public class Example1 extends JFrame implements GLEventListener {
 
 	private GLCanvas myCanvas;
 	
-	public Example1() throws HeadlessException {
+	public Example1() {
 		super("Example 1");
 		
 		setSize(600,400);
