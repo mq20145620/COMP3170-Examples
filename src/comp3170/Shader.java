@@ -17,13 +17,22 @@ public class Shader {
 	private Map<String, Integer> attributes;
 	private Map<String, Integer> uniforms;
 	
+	/**
+	 * Compile and link a vertex and fragment shader
+	 * 
+	 * @param vertexShaderFile
+	 * @param fragmentShaderFile
+	 * @throws IOException
+	 * @throws GLException
+	 */
+	
 	public Shader(File vertexShaderFile, File fragmentShaderFile) throws IOException, GLException {
 		GL4 gl = (GL4) GLContext.getCurrentGL();
 			
 		// compile the shaders
 		
-		int vertexShader = createShader(GL4.GL_VERTEX_SHADER, vertexShaderFile);
-		int fragmentShader = createShader(GL4.GL_FRAGMENT_SHADER, fragmentShaderFile);
+		int vertexShader = compileShader(GL4.GL_VERTEX_SHADER, vertexShaderFile);
+		int fragmentShader = compileShader(GL4.GL_FRAGMENT_SHADER, fragmentShaderFile);
 		
 		// link the shaders
 		
@@ -63,6 +72,10 @@ public class Shader {
 		recordUniforms();	
 	}
 
+	/**
+	 * Establish the mapping from attribute names to IDs
+	 */
+
 	private void recordAttributes() {
 		GL4 gl = (GL4) GLContext.getCurrentGL();
 
@@ -85,10 +98,15 @@ public class Shader {
             this.attributes.put(name, i);
 	    }
 	}
-	
+
+	/**
+	 * Establish the mapping from uniform names to IDs
+	 */
+
 	private void recordUniforms() {
 		GL4 gl = (GL4) GLContext.getCurrentGL();
 
+		
 		this.uniforms = new HashMap<String,Integer>();		
 		int[] iBuff = new int[1];
 		gl.glGetProgramiv(this.program, GL4.GL_ACTIVE_UNIFORMS, iBuff, 0);
@@ -109,6 +127,13 @@ public class Shader {
 	    }
 	}
 	
+	/**
+	 * Read source code from a shader file.
+	 * 
+	 * @param shaderFile
+	 * @return
+	 * @throws IOException
+	 */
 	public static String[] readSource(File shaderFile) throws IOException {
 		ArrayList<String> source = new ArrayList<String>();
 		BufferedReader in = null;
@@ -134,7 +159,17 @@ public class Shader {
 		return source.toArray(lines);
 	}
 	
-	public static int createShader(int type, File sourceFile) throws GLException, IOException {
+	/**
+	 * Compile a shader
+	 * 
+	 * @param type
+	 * @param sourceFile
+	 * @return
+	 * @throws GLException
+	 * @throws IOException
+	 */
+	
+	public static int compileShader(int type, File sourceFile) throws GLException, IOException {
 		GL4 gl = (GL4) GLContext.getCurrentGL();
 
 		String[] source = readSource(sourceFile);
@@ -170,6 +205,12 @@ public class Shader {
 		return shader;
 	}
 	
+	/**
+	 * Turn a shader type constant into a descriptive string.
+	 * 
+	 * @param type
+	 * @return
+	 */
 	public static String shaderType(int type) {
 		switch (type) {
 		case GL4.GL_VERTEX_SHADER:
