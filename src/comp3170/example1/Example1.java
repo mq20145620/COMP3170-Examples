@@ -1,4 +1,4 @@
-package comp3170;
+package comp3170.example1;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -7,11 +7,9 @@ import javax.swing.JFrame;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
-import com.jogamp.opengl.GL2ES1;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.awt.GLCanvas;
-import com.jogamp.opengl.fixedfunc.GLLightingFunc;
 
 public class Example1 extends JFrame implements GLEventListener {
 
@@ -48,6 +46,9 @@ public class Example1 extends JFrame implements GLEventListener {
 	public void display(GLAutoDrawable drawable) {
 		final GL2 gl = drawable.getGL().getGL2();
 		gl.glClear(GL.GL_COLOR_BUFFER_BIT);		
+
+	
+	
 	}
 
 	@Override
