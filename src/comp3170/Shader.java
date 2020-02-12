@@ -99,6 +99,24 @@ public class Shader {
 	}
 
 	
+	public void enable() {
+		GL4 gl = (GL4) GLContext.getCurrentGL();
+        gl.glUseProgram(this.program);
+
+        for (String name : this.attributes.keySet()) {
+        	gl.glEnableVertexAttribArray(this.attributes.get(name));
+	    }
+	}
+
+	public void disable() {
+		GL4 gl = (GL4) GLContext.getCurrentGL();
+
+        for (String name : this.attributes.keySet()) {
+        	gl.glDisableVertexAttribArray(this.attributes.get(name));
+	    }
+	}
+
+	
 	/**
 	 * Establish the mapping from attribute names to IDs
 	 */
