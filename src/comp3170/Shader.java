@@ -20,7 +20,7 @@ import com.jogamp.opengl.GLContext;
 
 public class Shader {
 
-	private int program;
+	public int program;
 	private Map<String, Integer> attributes;
 	private Map<String, Integer> attributeTypes;
 	private Map<String, Integer> uniforms;
@@ -81,41 +81,33 @@ public class Shader {
 		recordUniforms();
 	}
 
+	public int getAttribute(String name) {
+		GL4 gl = (GL4) GLContext.getCurrentGL();
+		int a = gl.glGetAttribLocation(this.program, name);
+		
+		if (a < 0) {
+			throw new IllegalArgumentException(String.format("Unknown attribute: '%s'", name));
+		}
+		
+		return a;
+	}
+
+	public int getUniform(String name) {
+		GL4 gl = (GL4) GLContext.getCurrentGL();
+		int u = gl.glGetUniformLocation(this.program, name);
+		
+		if (u < 0) {
+			throw new IllegalArgumentException(String.format("Unknown uniform: '%s'", name));
+		}
+		
+		return u;
+	}
 	
-	public int getAttribute(String attribute) {
-		if (!attributes.containsKey(attribute)) {
-			throw new IllegalArgumentException("Unkown attribute: " + attribute);
-		}
-		
-		return attributes.get(attribute);
-	}
-
-	public int getAttributeType(String attribute) {
-		if (!attributeTypes.containsKey(attribute)) {
-			throw new IllegalArgumentException("Unkown attribute: " + attribute);
-		}
-		
-		return attributeTypes.get(attribute);
-	}
-
 	
 	public void enable() {
 		GL4 gl = (GL4) GLContext.getCurrentGL();
-        gl.glUseProgram(this.program);
-
-        for (String name : this.attributes.keySet()) {
-        	gl.glEnableVertexAttribArray(this.attributes.get(name));
-	    }
+		gl.glUseProgram(this.program);
 	}
-
-	public void disable() {
-		GL4 gl = (GL4) GLContext.getCurrentGL();
-
-        for (String name : this.attributes.keySet()) {
-        	gl.glDisableVertexAttribArray(this.attributes.get(name));
-	    }
-	}
-
 	
 	/**
 	 * Establish the mapping from attribute names to IDs

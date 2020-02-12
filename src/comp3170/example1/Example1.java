@@ -4,12 +4,17 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
+import java.nio.FloatBuffer;
 
 import javax.swing.JFrame;
 
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2;
+import org.joml.Matrix4f;
+
+import com.jogamp.common.nio.Buffers;
+import com.jogamp.opengl.GL4;
+import static com.jogamp.opengl.GL4.*;
 import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLContext;
 import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.awt.GLCanvas;
 
@@ -18,45 +23,69 @@ import comp3170.Shader;
 
 public class Example1 extends JFrame implements GLEventListener {
 
-	private GLCanvas myCanvas;
+	private final float TAU = (float) (Math.PI * 2);
+	
+	private GLCanvas canvas;
+	private Shader shader;
 	
 	final private String VERTEX_SHADER = "src/comp3170/example1/vertex.glsl";
 	final private String FRAGMENT_SHADER = "src/comp3170/example1/fragment.glsl";
+	
+	private Cube cube; 
+	private Quad quad; 
+	
+	final private Matrix4f modelMatrix = new Matrix4f();
+	final private Matrix4f cameraMatrix = new Matrix4f();
+	final private Matrix4f projectionMatrix = new Matrix4f();
+	final private Matrix4f mvpMatrix = new Matrix4f(); 
+	
+	final private float cameraDistance = 3.0f;
+	final private float cameraPitch = 0;
+	final private float cameraYaw = 0;
+	final private float cameraFOVY = TAU / 6;
+	final private float cameraNear = 0.1f;
+	final private float cameraFar = 10f;
 	
 	public Example1() {
 		super("Example 1");
 		
 		setSize(600,400);
-		myCanvas = new GLCanvas();
-		myCanvas.addGLEventListener(this);
+		this.canvas = new GLCanvas();
+		this.canvas.addGLEventListener(this);
 		
-		this.add(myCanvas);
+		this.add(canvas);
 		this.setVisible(true);
 		this.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
 				System.exit(0);
 			}
-		});
-		
-		
+		});		
 	}
 
 	@Override
 	public void init(GLAutoDrawable drawable) {
-		GL2 gl = drawable.getGL().getGL2();		
-		gl.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+		GL4 gl = (GL4) GLContext.getCurrentGL();
+		
+		gl.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+//		gl.glClearDepth(1.0f);
+//		gl.glEnable(GL.GL_DEPTH_TEST);
+//		gl.glDepthFunc(GL.GL_LEQUAL);	
 
-		Shader shader;
 		try {
-			shader = new Shader(new File(VERTEX_SHADER), new File(FRAGMENT_SHADER));
-			shader.enable();
+			this.shader = new Shader(new File(VERTEX_SHADER), new File(FRAGMENT_SHADER));
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (GLException e) {
 			e.printStackTrace();
 		}
 		
-
+		this.modelMatrix.identity();
+		this.cameraMatrix.identity();
+		this.projectionMatrix.identity();
+		
+		this.cube = new Cube();
+		this.quad = new Quad();
+		
 	}
 
 	@Override
@@ -65,17 +94,48 @@ public class Example1 extends JFrame implements GLEventListener {
 
 	@Override
 	public void display(GLAutoDrawable drawable) {
-		final GL2 gl = drawable.getGL().getGL2();
-		gl.glClear(GL.GL_COLOR_BUFFER_BIT);		
+		GL4 gl = (GL4) GLContext.getCurrentGL();
 
+		// resize the viewport
+		
+        gl.glViewport(0, 0, this.canvas.getWidth(), this.canvas.getHeight());
+        
+        // clear the colour and depth buffers
+        
+		gl.glClear(GL_COLOR_BUFFER_BIT);		
+		gl.glClear(GL_DEPTH_BUFFER_BIT);		
+
+		// set up the mvp matrix
+		
+//		this.cameraMatrix.rotateAffineXYZ(0, cameraYaw, 0);
+//		this.cameraMatrix.rotateAffineXYZ(cameraPitch, 0, 0);
+//		this.cameraMatrix.translate(0, 0, cameraDistance);
 	
-	
+		this.mvpMatrix.set(this.modelMatrix);
+//		this.mvpMatrix.mul(this.cameraMatrix.invertAffine());
+//		this.mvpMatrix.mul(this.projectionMatrix);
+
+		this.shader.enable();
+
+		FloatBuffer fb = Buffers.newDirectFloatBuffer(16);
+		gl.glUniformMatrix4fv(shader.getUniform("u_mvpMatrix"), 1, false, this.mvpMatrix.get(fb));
+		
+		// draw a quad
+		
+        gl.glBindBuffer(GL_ARRAY_BUFFER, quad.vertexBuffer);
+        gl.glVertexAttribPointer(shader.getAttribute("a_position"), 3, GL_FLOAT, false, 0, 0);
+        gl.glEnableVertexAttribArray(shader.getAttribute("a_position"));
+
+        gl.glUniform4f(shader.getUniform("u_colour"), 1, 0, 0, 1);
+        
+        gl.glDrawArrays(GL_TRIANGLES, 0, quad.vertices.length / 3);           	
 	}
 
 	@Override
 	public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
-		GL2 gl = drawable.getGL().getGL2();
+		GL4 gl = (GL4) GLContext.getCurrentGL();
 		final float aspect = (float) width / (float) height;
+//		this.projectionMatrix.perspective(this.cameraFOVY, aspect, this.cameraNear, this.cameraFar);
 		
 	}
 
