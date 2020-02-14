@@ -28,8 +28,8 @@ public class Example1 extends JFrame implements GLEventListener {
 	private GLCanvas canvas;
 	private Shader shader;
 	
-	final private String VERTEX_SHADER = "src/comp3170/example1/vertex.glsl";
-	final private String FRAGMENT_SHADER = "src/comp3170/example1/fragment.glsl";
+	final private String VERTEX_SHADER = "src/comp3170/example1/wireframe vertex.glsl";
+	final private String FRAGMENT_SHADER = "src/comp3170/example1/wireframe fragment.glsl";
 	
 	private Cube cube; 
 	private Quad quad; 
@@ -42,7 +42,7 @@ public class Example1 extends JFrame implements GLEventListener {
 	final private float cameraDistance = 5.0f;
 	final private float cameraPitch = 0;
 	final private float cameraYaw = 0;
-	final private float cameraFOVY = TAU / 4;
+	final private float cameraFOVY = TAU / 6;	// 60 degrees
 	final private float cameraNear = 0.1f;
 	final private float cameraFar = 20f;
 	
@@ -106,27 +106,33 @@ public class Example1 extends JFrame implements GLEventListener {
 		gl.glClear(GL_DEPTH_BUFFER_BIT);		
 
 		// set up the mvp matrix
-		
+
+		this.cameraMatrix.identity();
 		this.cameraMatrix.rotateAffineXYZ(0, cameraYaw, 0);
 		this.cameraMatrix.rotateAffineXYZ(cameraPitch, 0, 0);
 		this.cameraMatrix.translate(0, 0, cameraDistance);
 	
-		this.mvpMatrix.set(this.modelMatrix);
+		this.mvpMatrix.set(this.projectionMatrix);
 		this.mvpMatrix.mul(this.cameraMatrix.invertAffine());
-		this.mvpMatrix.mul(this.projectionMatrix);
+		this.mvpMatrix.mul(this.modelMatrix);
 
 		this.shader.enable();
 
 		FloatBuffer fb = Buffers.newDirectFloatBuffer(16);
 		gl.glUniformMatrix4fv(shader.getUniform("u_mvpMatrix"), 1, false, this.mvpMatrix.get(fb));
 		
-		// draw a quad
+		// draw a cube
 		
         gl.glBindBuffer(GL_ARRAY_BUFFER, cube.vertexBuffer);
         gl.glVertexAttribPointer(shader.getAttribute("a_position"), 3, GL_FLOAT, false, 0, 0);
         gl.glEnableVertexAttribArray(shader.getAttribute("a_position"));
 
+        gl.glBindBuffer(GL_ARRAY_BUFFER, cube.barycentricBuffer);
+        gl.glVertexAttribPointer(shader.getAttribute("a_barycentric"), 3, GL_FLOAT, false, 0, 0);
+        gl.glEnableVertexAttribArray(shader.getAttribute("a_barycentric"));
+        
         gl.glUniform4f(shader.getUniform("u_colour"), 1, 0, 0, 1);
+        gl.glUniform1f(shader.getUniform("u_width"), 2f);
         
         gl.glDrawArrays(GL_TRIANGLES, 0, cube.vertices.length / 3);           	
 	}
@@ -135,9 +141,8 @@ public class Example1 extends JFrame implements GLEventListener {
 	public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
 		GL4 gl = (GL4) GLContext.getCurrentGL();
 		final float aspect = (float) width / (float) height;
-//		this.projectionMatrix.perspective(this.cameraFOVY, aspect, this.cameraNear, this.cameraFar);
-		
-		this.projectionMatrix.ortho(-2 * aspect, 2 * aspect, -2, 2, this.cameraNear, this.cameraFar);
+		this.projectionMatrix.setPerspective(this.cameraFOVY, aspect, this.cameraNear, this.cameraFar);		
+//		this.projectionMatrix.setOrtho(-2 * aspect, 2 * aspect, -2, 2, this.cameraNear, this.cameraFar);
 		
 	}
 

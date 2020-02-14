@@ -179,20 +179,24 @@ public class Cube {
             0, -1.0f, 0,
             0, -1.0f, 0,
 	};
+	
+	public float[] barycentric;
 
 	int vertexBuffer;
 	int uvBuffer;
 	int normalBuffer;
+	int barycentricBuffer;
 
 	public Cube() {
 		GL4 gl = (GL4) GLContext.getCurrentGL();
 
-		int[] buffers = new int[3];
+	    int[] buffers = new int[4];
 		gl.glGenBuffers(buffers.length, buffers, 0);
 		
         this.vertexBuffer = buffers[0];
         this.uvBuffer = buffers[1];
         this.normalBuffer = buffers[2];
+        this.barycentricBuffer = buffers[3];
 
         FloatBuffer buffer;
         
@@ -207,7 +211,33 @@ public class Cube {
 		buffer = Buffers.newDirectFloatBuffer(this.normals);
         gl.glBindBuffer(GL_ARRAY_BUFFER, this.normalBuffer);
         gl.glBufferData(GL_ARRAY_BUFFER, this.normals.length * SIZEOF_FLOAT, buffer, GL_STATIC_DRAW);
+
+        this.barycentric = makeBarycentric();
+		buffer = Buffers.newDirectFloatBuffer(this.barycentric);
+        gl.glBindBuffer(GL_ARRAY_BUFFER, this.barycentricBuffer);
+        gl.glBufferData(GL_ARRAY_BUFFER, this.barycentric.length * SIZEOF_FLOAT, buffer, GL_STATIC_DRAW);
+
+	}
+	
+	private float[] makeBarycentric() {
+		float[] barycentric = new float[vertices.length];
+
+		int i = 0;
+		while (i < vertices.length / 9) {
+			barycentric[i++] = 1;
+			barycentric[i++] = 0;
+			barycentric[i++] = 0;
+
+			barycentric[i++] = 0;
+			barycentric[i++] = 1;
+			barycentric[i++] = 0;
+			
+			barycentric[i++] = 0;
+			barycentric[i++] = 0;
+			barycentric[i++] = 1;			
+		}
 		
+		return barycentric;
 	}
 	
 }
