@@ -261,16 +261,17 @@ public class Shader {
 
 		int[] compiled = new int[1];
 		gl.glGetShaderiv(shader, GL4.GL_COMPILE_STATUS, compiled, 0);
+		String logString = "";
 
 		if (compiled[0] != 1) {
 
 			int[] maxlen = new int[1];
-			int[] len = new int[1];
-			byte[] log = null;
-			String logString = "";
-
 			gl.glGetShaderiv(shader, GL4.GL_INFO_LOG_LENGTH, maxlen, 0);
-			if (len[0] > 0) {
+
+			if (maxlen[0] > 0) {
+				int[] len = new int[1];
+				byte[] log = null;
+
 				log = new byte[maxlen[0]];
 				gl.glGetShaderInfoLog(shader, maxlen[0], len, 0, log, 0);
 				logString = new String(log);
