@@ -1,10 +1,13 @@
 package comp3170.example1;
 
 import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
+import static com.jogamp.opengl.GL.GL_BACK;
 import static com.jogamp.opengl.GL.GL_COLOR_BUFFER_BIT;
+import static com.jogamp.opengl.GL.GL_CULL_FACE;
 import static com.jogamp.opengl.GL.GL_DEPTH_BUFFER_BIT;
 import static com.jogamp.opengl.GL.GL_DEPTH_TEST;
 import static com.jogamp.opengl.GL.GL_FLOAT;
+import static com.jogamp.opengl.GL.GL_FRONT;
 import static com.jogamp.opengl.GL.GL_LEQUAL;
 import static com.jogamp.opengl.GL.GL_TRIANGLES;
 
@@ -45,6 +48,7 @@ public class Example1 extends JFrame implements GLEventListener, KeyListener {
 	
 	private Cube cube; 
 	private Quad quad; 
+	private Sphere sphere;
 	
 	final private Matrix4f modelMatrix = new Matrix4f();
 	final private Matrix4f cameraMatrix = new Matrix4f();
@@ -54,17 +58,18 @@ public class Example1 extends JFrame implements GLEventListener, KeyListener {
 	private float cameraDistance = 5.0f;
 	private float cameraPitch = 0;
 	private float cameraYaw = 0;
-	private float cameraFOVY = TAU / 6;	// 60 degrees
+	private float cameraFOVY = TAU / 6;	// 90 degrees
 	final private float cameraNear = 0.1f;
 	final private float cameraFar = 20f;
 	
-	final private float cameraTurnSpeed = TAU / 5;	// radians per second
+	final private float cameraTurnSpeed = TAU / 3;	// radians per second
 	final private float cameraDollySpeed = 1.0f; // m per second
 	
 	private Animator animator;
 	private long oldTime;
 	
 	private Set<Integer> keysDown;
+
 
 	public Example1() {
 		super("Example 1");
@@ -98,7 +103,9 @@ public class Example1 extends JFrame implements GLEventListener, KeyListener {
 		gl.glClearDepth(1.0f);
 		gl.glEnable(GL_DEPTH_TEST);
 		gl.glDepthFunc(GL_LEQUAL);	
-
+		gl.glEnable(GL_CULL_FACE);
+		gl.glCullFace(GL_BACK);
+		
 		try {
 			this.shader = new Shader(new File(VERTEX_SHADER), new File(FRAGMENT_SHADER));
 		} catch (IOException e) {
@@ -113,7 +120,7 @@ public class Example1 extends JFrame implements GLEventListener, KeyListener {
 		
 		this.cube = new Cube();
 		this.quad = new Quad();
-		
+		this.sphere = new Sphere();
 	}
 
 	@Override
@@ -153,10 +160,6 @@ public class Example1 extends JFrame implements GLEventListener, KeyListener {
 
 		update();
 		
-		// resize the viewport
-		
-        gl.glViewport(0, 0, this.canvas.getWidth(), this.canvas.getHeight());
-        
         // clear the colour and depth buffers
         
 		gl.glClear(GL_COLOR_BUFFER_BIT);		
@@ -180,23 +183,28 @@ public class Example1 extends JFrame implements GLEventListener, KeyListener {
 		
 		// draw a cube
 		
-        gl.glBindBuffer(GL_ARRAY_BUFFER, cube.vertexBuffer);
+        gl.glBindBuffer(GL_ARRAY_BUFFER, sphere.vertexBuffer);
         gl.glVertexAttribPointer(shader.getAttribute("a_position"), 3, GL_FLOAT, false, 0, 0);
         gl.glEnableVertexAttribArray(shader.getAttribute("a_position"));
 
-        gl.glBindBuffer(GL_ARRAY_BUFFER, cube.barycentricBuffer);
+        gl.glBindBuffer(GL_ARRAY_BUFFER, sphere.barycentricBuffer);
         gl.glVertexAttribPointer(shader.getAttribute("a_barycentric"), 3, GL_FLOAT, false, 0, 0);
         gl.glEnableVertexAttribArray(shader.getAttribute("a_barycentric"));
         
         gl.glUniform4f(shader.getUniform("u_colour"), 0, 1, 0, 1);
         gl.glUniform1f(shader.getUniform("u_width"), 2f);
         
-        gl.glDrawArrays(GL_TRIANGLES, 0, cube.vertices.length / 3);           	
+        gl.glDrawArrays(GL_TRIANGLES, 0, sphere.vertices.length / 3);           	
 	}
 
 	@Override
 	public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
 		GL4 gl = (GL4) GLContext.getCurrentGL();
+
+		// resize the viewport
+        gl.glViewport(0, 0, width, height);
+        
+        // resize the camera 
 		final float aspect = (float) width / (float) height;
 		this.projectionMatrix.setPerspective(this.cameraFOVY, aspect, this.cameraNear, this.cameraFar);		
 //		this.projectionMatrix.setOrtho(-2 * aspect, 2 * aspect, -2, 2, this.cameraNear, this.cameraFar);

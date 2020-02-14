@@ -2,6 +2,7 @@ uniform vec4 u_colour;
 uniform float u_width;
 
 varying vec3 v_barycentric;
+varying vec3 v_position;
 
 float edgeFactor(){
     vec3 d = fwidth(v_barycentric);
