@@ -39,12 +39,12 @@ public class Example1 extends JFrame implements GLEventListener {
 	final private Matrix4f projectionMatrix = new Matrix4f();
 	final private Matrix4f mvpMatrix = new Matrix4f(); 
 	
-	final private float cameraDistance = 3.0f;
+	final private float cameraDistance = 5.0f;
 	final private float cameraPitch = 0;
 	final private float cameraYaw = 0;
-	final private float cameraFOVY = TAU / 6;
+	final private float cameraFOVY = TAU / 4;
 	final private float cameraNear = 0.1f;
-	final private float cameraFar = 10f;
+	final private float cameraFar = 20f;
 	
 	public Example1() {
 		super("Example 1");
@@ -67,9 +67,9 @@ public class Example1 extends JFrame implements GLEventListener {
 		GL4 gl = (GL4) GLContext.getCurrentGL();
 		
 		gl.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-//		gl.glClearDepth(1.0f);
-//		gl.glEnable(GL.GL_DEPTH_TEST);
-//		gl.glDepthFunc(GL.GL_LEQUAL);	
+		gl.glClearDepth(1.0f);
+		gl.glEnable(GL_DEPTH_TEST);
+		gl.glDepthFunc(GL_LEQUAL);	
 
 		try {
 			this.shader = new Shader(new File(VERTEX_SHADER), new File(FRAGMENT_SHADER));
@@ -107,13 +107,13 @@ public class Example1 extends JFrame implements GLEventListener {
 
 		// set up the mvp matrix
 		
-//		this.cameraMatrix.rotateAffineXYZ(0, cameraYaw, 0);
-//		this.cameraMatrix.rotateAffineXYZ(cameraPitch, 0, 0);
-//		this.cameraMatrix.translate(0, 0, cameraDistance);
+		this.cameraMatrix.rotateAffineXYZ(0, cameraYaw, 0);
+		this.cameraMatrix.rotateAffineXYZ(cameraPitch, 0, 0);
+		this.cameraMatrix.translate(0, 0, cameraDistance);
 	
 		this.mvpMatrix.set(this.modelMatrix);
-//		this.mvpMatrix.mul(this.cameraMatrix.invertAffine());
-//		this.mvpMatrix.mul(this.projectionMatrix);
+		this.mvpMatrix.mul(this.cameraMatrix.invertAffine());
+		this.mvpMatrix.mul(this.projectionMatrix);
 
 		this.shader.enable();
 
@@ -122,13 +122,13 @@ public class Example1 extends JFrame implements GLEventListener {
 		
 		// draw a quad
 		
-        gl.glBindBuffer(GL_ARRAY_BUFFER, quad.vertexBuffer);
+        gl.glBindBuffer(GL_ARRAY_BUFFER, cube.vertexBuffer);
         gl.glVertexAttribPointer(shader.getAttribute("a_position"), 3, GL_FLOAT, false, 0, 0);
         gl.glEnableVertexAttribArray(shader.getAttribute("a_position"));
 
         gl.glUniform4f(shader.getUniform("u_colour"), 1, 0, 0, 1);
         
-        gl.glDrawArrays(GL_TRIANGLES, 0, quad.vertices.length / 3);           	
+        gl.glDrawArrays(GL_TRIANGLES, 0, cube.vertices.length / 3);           	
 	}
 
 	@Override
@@ -136,6 +136,8 @@ public class Example1 extends JFrame implements GLEventListener {
 		GL4 gl = (GL4) GLContext.getCurrentGL();
 		final float aspect = (float) width / (float) height;
 //		this.projectionMatrix.perspective(this.cameraFOVY, aspect, this.cameraNear, this.cameraFar);
+		
+		this.projectionMatrix.ortho(-2 * aspect, 2 * aspect, -2, 2, this.cameraNear, this.cameraFar);
 		
 	}
 
