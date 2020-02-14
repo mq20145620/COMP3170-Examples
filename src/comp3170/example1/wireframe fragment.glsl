@@ -9,8 +9,6 @@ float edgeFactor(){
     return min(min(a3.x, a3.y), a3.z);
 }
 void main() {
-	gl_FragColor.rgb = mix(u_colour, vec(0.0), edgeFactor());
-	gl_FragColor.a = u_colour.a;
-	
+	gl_FragColor = mix(u_colour, vec4(0.0), edgeFactor());
 }
 
