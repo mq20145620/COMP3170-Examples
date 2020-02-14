@@ -58,8 +58,8 @@ public class Example1 extends JFrame implements GLEventListener, KeyListener {
 	final private float cameraNear = 0.1f;
 	final private float cameraFar = 20f;
 	
-	final private float cameraTurnSpeed = TAU / 10;	// radians per second
-	final private float cameraDollySpeed = 0.5f; // m per second
+	final private float cameraTurnSpeed = TAU / 5;	// radians per second
+	final private float cameraDollySpeed = 1.0f; // m per second
 	
 	private Animator animator;
 	private long oldTime;
@@ -136,6 +136,12 @@ public class Example1 extends JFrame implements GLEventListener, KeyListener {
 		}
 		if (keysDown.contains(KeyEvent.VK_DOWN)) {
 			this.cameraPitch += cameraTurnSpeed * deltaTime;
+		}
+		if (keysDown.contains(KeyEvent.VK_PAGE_DOWN)) {
+			this.cameraDistance += cameraDollySpeed * deltaTime;
+		}
+		if (keysDown.contains(KeyEvent.VK_PAGE_UP)) {
+			this.cameraDistance -= cameraDollySpeed * deltaTime;
 		}
 		
 		

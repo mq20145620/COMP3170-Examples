@@ -223,7 +223,7 @@ public class Cube {
 		float[] barycentric = new float[vertices.length];
 
 		int i = 0;
-		while (i < vertices.length / 9) {
+		while (i < vertices.length) {
 			barycentric[i++] = 1;
 			barycentric[i++] = 0;
 			barycentric[i++] = 0;
