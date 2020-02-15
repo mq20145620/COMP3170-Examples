@@ -1,11 +1,9 @@
-package comp3170.example1;	
+package comp3170.example1.shapes;	
 
 import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
 import static com.jogamp.opengl.GL.GL_STATIC_DRAW;
 
 import java.nio.FloatBuffer;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.GL4;
@@ -19,10 +17,10 @@ public class Sphere {
 	public float[] vertices;
 	public float[] barycentric;
 
-	int vertexBuffer;
-	int barycentricBuffer;
+	public int vertexBuffer;
+	public int barycentricBuffer;
 	
-	private int NUM_DIVISIONS = 36;
+	private int NUM_DIVISIONS = 72;
 
 	public Sphere() {
 		GL4 gl = (GL4) GLContext.getCurrentGL();

@@ -1,4 +1,4 @@
-package comp3170.example1;	
+package comp3170.example1.shapes;	
 
 import java.nio.FloatBuffer;
 
@@ -23,7 +23,7 @@ public class Quad {
 	};
 
 
-	int vertexBuffer;
+	public int vertexBuffer;
 
 	public Quad() {
 		GL4 gl = (GL4) GLContext.getCurrentGL();

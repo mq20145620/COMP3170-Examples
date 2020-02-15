@@ -7,7 +7,6 @@ import static com.jogamp.opengl.GL.GL_CULL_FACE;
 import static com.jogamp.opengl.GL.GL_DEPTH_BUFFER_BIT;
 import static com.jogamp.opengl.GL.GL_DEPTH_TEST;
 import static com.jogamp.opengl.GL.GL_FLOAT;
-import static com.jogamp.opengl.GL.GL_FRONT;
 import static com.jogamp.opengl.GL.GL_LEQUAL;
 import static com.jogamp.opengl.GL.GL_TRIANGLES;
 
@@ -35,6 +34,10 @@ import com.jogamp.opengl.util.Animator;
 
 import comp3170.GLException;
 import comp3170.Shader;
+import comp3170.example1.shapes.Cube;
+import comp3170.example1.shapes.Quad;
+import comp3170.example1.shapes.Sphere;
+import comp3170.example1.shapes.Torus;
 
 public class Example1 extends JFrame implements GLEventListener, KeyListener {
 
@@ -49,6 +52,7 @@ public class Example1 extends JFrame implements GLEventListener, KeyListener {
 	private Cube cube; 
 	private Quad quad; 
 	private Sphere sphere;
+	private Torus torus;
 	
 	final private Matrix4f modelMatrix = new Matrix4f();
 	final private Matrix4f cameraMatrix = new Matrix4f();
@@ -121,6 +125,7 @@ public class Example1 extends JFrame implements GLEventListener, KeyListener {
 		this.cube = new Cube();
 		this.quad = new Quad();
 		this.sphere = new Sphere();
+		this.torus = new Torus();
 	}
 
 	@Override
@@ -183,18 +188,18 @@ public class Example1 extends JFrame implements GLEventListener, KeyListener {
 		
 		// draw a cube
 		
-        gl.glBindBuffer(GL_ARRAY_BUFFER, sphere.vertexBuffer);
+        gl.glBindBuffer(GL_ARRAY_BUFFER, torus.vertexBuffer);
         gl.glVertexAttribPointer(shader.getAttribute("a_position"), 3, GL_FLOAT, false, 0, 0);
         gl.glEnableVertexAttribArray(shader.getAttribute("a_position"));
 
-        gl.glBindBuffer(GL_ARRAY_BUFFER, sphere.barycentricBuffer);
+        gl.glBindBuffer(GL_ARRAY_BUFFER, torus.barycentricBuffer);
         gl.glVertexAttribPointer(shader.getAttribute("a_barycentric"), 3, GL_FLOAT, false, 0, 0);
         gl.glEnableVertexAttribArray(shader.getAttribute("a_barycentric"));
         
-        gl.glUniform4f(shader.getUniform("u_colour"), 0, 1, 0, 1);
+        gl.glUniform4f(shader.getUniform("u_colour"), 1, 1, 0, 1);
         gl.glUniform1f(shader.getUniform("u_width"), 2f);
         
-        gl.glDrawArrays(GL_TRIANGLES, 0, sphere.vertices.length / 3);           	
+        gl.glDrawArrays(GL_TRIANGLES, 0, torus.vertices.length / 3);           	
 	}
 
 	@Override

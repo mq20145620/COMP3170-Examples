@@ -1,4 +1,4 @@
-package comp3170.example1;	
+package comp3170.example1.shapes;	
 
 import java.nio.FloatBuffer;
 
@@ -182,10 +182,10 @@ public class Cube {
 	
 	public float[] barycentric;
 
-	int vertexBuffer;
-	int uvBuffer;
-	int normalBuffer;
-	int barycentricBuffer;
+	public int vertexBuffer;
+	public int uvBuffer;
+	public int normalBuffer;
+	public int barycentricBuffer;
 
 	public Cube() {
 		GL4 gl = (GL4) GLContext.getCurrentGL();
