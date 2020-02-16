@@ -1,7 +1,9 @@
 package comp3170.example1.shapes;	
 
 import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
+import static com.jogamp.opengl.GL.GL_FLOAT;
 import static com.jogamp.opengl.GL.GL_STATIC_DRAW;
+import static com.jogamp.opengl.GL.GL_TRIANGLES;
 
 import java.nio.FloatBuffer;
 
@@ -12,7 +14,9 @@ import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.GLContext;
 
-public class Torus {
+import comp3170.Shader;
+
+public class Torus extends Mesh {
 
 	private final static float TAU = (float) (Math.PI * 2);
 	private final static int SIZEOF_FLOAT = 4;
@@ -124,32 +128,29 @@ public class Torus {
         gl.glBindBuffer(GL_ARRAY_BUFFER, this.vertexBuffer);
         gl.glBufferData(GL_ARRAY_BUFFER, this.vertices.length * SIZEOF_FLOAT, buffer, GL_STATIC_DRAW);
 
-        this.barycentric = makeBarycentric();
+        this.barycentric = makeBarycentric(this.vertices);
 		buffer = Buffers.newDirectFloatBuffer(this.barycentric);
         gl.glBindBuffer(GL_ARRAY_BUFFER, this.barycentricBuffer);
         gl.glBufferData(GL_ARRAY_BUFFER, this.barycentric.length * SIZEOF_FLOAT, buffer, GL_STATIC_DRAW);
 
 	}
 	
-	private float[] makeBarycentric() {
-		float[] barycentric = new float[vertices.length];
+	@Override
+	void draw(Shader shader) {
+		GL4 gl = (GL4) GLContext.getCurrentGL();
+        gl.glBindBuffer(GL_ARRAY_BUFFER, this.vertexBuffer);
+        gl.glVertexAttribPointer(shader.getAttribute("a_position"), 3, GL_FLOAT, false, 0, 0);
+        gl.glEnableVertexAttribArray(shader.getAttribute("a_position"));
 
-		int i = 0;
-		while (i < vertices.length) {
-			barycentric[i++] = 1;
-			barycentric[i++] = 0;
-			barycentric[i++] = 0;
-
-			barycentric[i++] = 0;
-			barycentric[i++] = 1;
-			barycentric[i++] = 0;
-			
-			barycentric[i++] = 0;
-			barycentric[i++] = 0;
-			barycentric[i++] = 1;			
-		}
+        gl.glBindBuffer(GL_ARRAY_BUFFER, this.barycentricBuffer);
+        gl.glVertexAttribPointer(shader.getAttribute("a_barycentric"), 3, GL_FLOAT, false, 0, 0);
+        gl.glEnableVertexAttribArray(shader.getAttribute("a_barycentric"));
+        
+        gl.glUniform4f(shader.getUniform("u_colour"), 1, 1, 0, 1);
+        gl.glUniform1f(shader.getUniform("u_width"), 2f);
+        
+        gl.glDrawArrays(GL_TRIANGLES, 0, this.vertices.length / 3);           	
 		
-		return barycentric;
 	}
 	
 }

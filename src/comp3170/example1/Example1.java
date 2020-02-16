@@ -187,19 +187,7 @@ public class Example1 extends JFrame implements GLEventListener, KeyListener {
 		gl.glUniformMatrix4fv(shader.getUniform("u_mvpMatrix"), 1, false, this.mvpMatrix.get(fb));
 		
 		// draw a cube
-		
-        gl.glBindBuffer(GL_ARRAY_BUFFER, torus.vertexBuffer);
-        gl.glVertexAttribPointer(shader.getAttribute("a_position"), 3, GL_FLOAT, false, 0, 0);
-        gl.glEnableVertexAttribArray(shader.getAttribute("a_position"));
-
-        gl.glBindBuffer(GL_ARRAY_BUFFER, torus.barycentricBuffer);
-        gl.glVertexAttribPointer(shader.getAttribute("a_barycentric"), 3, GL_FLOAT, false, 0, 0);
-        gl.glEnableVertexAttribArray(shader.getAttribute("a_barycentric"));
-        
-        gl.glUniform4f(shader.getUniform("u_colour"), 1, 1, 0, 1);
-        gl.glUniform1f(shader.getUniform("u_width"), 2f);
-        
-        gl.glDrawArrays(GL_TRIANGLES, 0, torus.vertices.length / 3);           	
+		quad.draw(shader);;
 	}
 
 	@Override
