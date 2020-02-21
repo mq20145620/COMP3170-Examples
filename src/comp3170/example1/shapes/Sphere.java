@@ -16,24 +16,13 @@ import comp3170.Shader;
 public class Sphere extends Mesh {
 
 	private final static float TAU = (float) (Math.PI * 2);
-	private final static int SIZEOF_FLOAT = 4;
 
 	public float[] vertices;
-	public float[] barycentric;
 
-	public int vertexBuffer;
-	public int barycentricBuffer;
-	
 	private int NUM_DIVISIONS = 72;
 
 	public Sphere() {
 		GL4 gl = (GL4) GLContext.getCurrentGL();
-
-	    int[] buffers = new int[2];
-		gl.glGenBuffers(buffers.length, buffers, 0);
-		
-        this.vertexBuffer = buffers[0];
-        this.barycentricBuffer = buffers[1];
 
         FloatBuffer buffer;
         
@@ -94,29 +83,13 @@ public class Sphere extends Mesh {
         buffer = Buffers.newDirectFloatBuffer(this.vertices);
         gl.glBindBuffer(GL_ARRAY_BUFFER, this.vertexBuffer);
         gl.glBufferData(GL_ARRAY_BUFFER, this.vertices.length * SIZEOF_FLOAT, buffer, GL_STATIC_DRAW);
+		this.size = vertices.length;
 
-        this.barycentric = makeBarycentric(this.vertices);
-		buffer = Buffers.newDirectFloatBuffer(this.barycentric);
+        float[] barycentric = makeBarycentric(this.vertices);
+		buffer = Buffers.newDirectFloatBuffer(barycentric);
         gl.glBindBuffer(GL_ARRAY_BUFFER, this.barycentricBuffer);
-        gl.glBufferData(GL_ARRAY_BUFFER, this.barycentric.length * SIZEOF_FLOAT, buffer, GL_STATIC_DRAW);
+        gl.glBufferData(GL_ARRAY_BUFFER, barycentric.length * SIZEOF_FLOAT, buffer, GL_STATIC_DRAW);
 
-	}
-	@Override
-	void draw(Shader shader) {
-		GL4 gl = (GL4) GLContext.getCurrentGL();
-        gl.glBindBuffer(GL_ARRAY_BUFFER, this.vertexBuffer);
-        gl.glVertexAttribPointer(shader.getAttribute("a_position"), 3, GL_FLOAT, false, 0, 0);
-        gl.glEnableVertexAttribArray(shader.getAttribute("a_position"));
-
-        gl.glBindBuffer(GL_ARRAY_BUFFER, this.barycentricBuffer);
-        gl.glVertexAttribPointer(shader.getAttribute("a_barycentric"), 3, GL_FLOAT, false, 0, 0);
-        gl.glEnableVertexAttribArray(shader.getAttribute("a_barycentric"));
-        
-        gl.glUniform4f(shader.getUniform("u_colour"), 1, 1, 0, 1);
-        gl.glUniform1f(shader.getUniform("u_width"), 2f);
-        
-        gl.glDrawArrays(GL_TRIANGLES, 0, this.vertices.length / 3);           	
-		
 	}
 	
 }

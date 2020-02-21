@@ -1,14 +1,11 @@
 package comp3170.example1;
 
-import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
 import static com.jogamp.opengl.GL.GL_BACK;
 import static com.jogamp.opengl.GL.GL_COLOR_BUFFER_BIT;
 import static com.jogamp.opengl.GL.GL_CULL_FACE;
 import static com.jogamp.opengl.GL.GL_DEPTH_BUFFER_BIT;
 import static com.jogamp.opengl.GL.GL_DEPTH_TEST;
-import static com.jogamp.opengl.GL.GL_FLOAT;
 import static com.jogamp.opengl.GL.GL_LEQUAL;
-import static com.jogamp.opengl.GL.GL_TRIANGLES;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -35,6 +32,7 @@ import com.jogamp.opengl.util.Animator;
 import comp3170.GLException;
 import comp3170.Shader;
 import comp3170.example1.shapes.Cube;
+import comp3170.example1.shapes.Mesh;
 import comp3170.example1.shapes.Quad;
 import comp3170.example1.shapes.Sphere;
 import comp3170.example1.shapes.Torus;
@@ -53,6 +51,7 @@ public class Example1 extends JFrame implements GLEventListener, KeyListener {
 	private Quad quad; 
 	private Sphere sphere;
 	private Torus torus;
+	private Mesh currentMesh;
 	
 	final private Matrix4f modelMatrix = new Matrix4f();
 	final private Matrix4f cameraMatrix = new Matrix4f();
@@ -78,11 +77,15 @@ public class Example1 extends JFrame implements GLEventListener, KeyListener {
 	public Example1() {
 		super("Example 1");
 		
-		setSize(600,400);
+		// create an OpenGL canvas and add this as a listener
+		
 		this.canvas = new GLCanvas();
 		this.canvas.addGLEventListener(this);
-
 		this.add(canvas);
+		
+		// set up the JFrame
+		
+		this.setSize(800,600);
 		this.setVisible(true);
 		this.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
@@ -90,16 +93,24 @@ public class Example1 extends JFrame implements GLEventListener, KeyListener {
 			}
 		});	
 		
+		// Listen for key events
+		
 		keysDown = new HashSet<Integer>();
 		this.addKeyListener(this);
 		canvas.addKeyListener(this);
 
+		// Add an animator to regularly redraw the screen
+		
 		this.animator = new Animator(canvas);
 		oldTime = System.currentTimeMillis();
 		this.animator.start();
+		
 	}
 
 	@Override
+	/**
+	 * Initialise the GLCanvas
+	 */
 	public void init(GLAutoDrawable drawable) {
 		GL4 gl = (GL4) GLContext.getCurrentGL();
 		
@@ -109,7 +120,8 @@ public class Example1 extends JFrame implements GLEventListener, KeyListener {
 		gl.glDepthFunc(GL_LEQUAL);	
 		gl.glEnable(GL_CULL_FACE);
 		gl.glCullFace(GL_BACK);
-		
+
+		// Compile the shader
 		try {
 			this.shader = new Shader(new File(VERTEX_SHADER), new File(FRAGMENT_SHADER));
 		} catch (IOException e) {
@@ -118,24 +130,36 @@ public class Example1 extends JFrame implements GLEventListener, KeyListener {
 			e.printStackTrace();
 		}
 		
+		// Create the matrices
+		
 		this.modelMatrix.identity();
 		this.cameraMatrix.identity();
 		this.projectionMatrix.identity();
+		
+		// Create the meshes
 		
 		this.cube = new Cube();
 		this.quad = new Quad();
 		this.sphere = new Sphere();
 		this.torus = new Torus();
+		currentMesh = quad;
+
 	}
 
 	@Override
 	public void dispose(GLAutoDrawable drawable) {
 	}
 
-	public void update() {
+	/**
+	 * Update the scene
+	 */
+	private void update() {
+		// calculate how much time has passed since the last update
 		long time = System.currentTimeMillis();			// ms
 		float deltaTime = (time - oldTime) / 1000f;		// seconds
 		oldTime = time;	
+		
+		// move the camera using the arrow keys
 		
 		if (keysDown.contains(KeyEvent.VK_LEFT)) {
 			this.cameraYaw -= cameraTurnSpeed * deltaTime; 
@@ -156,6 +180,20 @@ public class Example1 extends JFrame implements GLEventListener, KeyListener {
 			this.cameraDistance -= cameraDollySpeed * deltaTime;
 		}
 		
+		// change the mesh
+		if (keysDown.contains(KeyEvent.VK_1) || keysDown.contains(KeyEvent.VK_NUMPAD1)) {
+			this.currentMesh = quad;
+		}
+		if (keysDown.contains(KeyEvent.VK_2) || keysDown.contains(KeyEvent.VK_NUMPAD2)) {
+			this.currentMesh = cube;
+		}
+		if (keysDown.contains(KeyEvent.VK_3) || keysDown.contains(KeyEvent.VK_NUMPAD3)) {
+			this.currentMesh = sphere;
+		}
+		if (keysDown.contains(KeyEvent.VK_4) || keysDown.contains(KeyEvent.VK_NUMPAD4)) {
+			this.currentMesh = torus;
+		}
+		
 		
 	}
 	
@@ -163,6 +201,8 @@ public class Example1 extends JFrame implements GLEventListener, KeyListener {
 	public void display(GLAutoDrawable drawable) {
 		GL4 gl = (GL4) GLContext.getCurrentGL();
 
+		// update the scene
+		
 		update();
 		
         // clear the colour and depth buffers
@@ -170,7 +210,7 @@ public class Example1 extends JFrame implements GLEventListener, KeyListener {
 		gl.glClear(GL_COLOR_BUFFER_BIT);		
 		gl.glClear(GL_DEPTH_BUFFER_BIT);		
 
-		// set up the mvp matrix
+		// set up the model, view and perspective 
 
 		this.cameraMatrix.identity();
 		this.cameraMatrix.rotateAffineXYZ(0, cameraYaw, 0);
@@ -181,13 +221,15 @@ public class Example1 extends JFrame implements GLEventListener, KeyListener {
 		this.mvpMatrix.mul(this.cameraMatrix.invertAffine());
 		this.mvpMatrix.mul(this.modelMatrix);
 
+		// send the matrix to the shader
+		
 		this.shader.enable();
 
 		FloatBuffer fb = Buffers.newDirectFloatBuffer(16);
 		gl.glUniformMatrix4fv(shader.getUniform("u_mvpMatrix"), 1, false, this.mvpMatrix.get(fb));
 		
 		// draw a cube
-		quad.draw(shader);;
+		currentMesh.draw(shader);
 	}
 
 	@Override
