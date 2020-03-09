@@ -14,6 +14,7 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -22,10 +23,13 @@ import javax.swing.JFrame;
 import org.joml.Matrix4f;
 
 import com.jogamp.common.nio.Buffers;
+import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLContext;
 import com.jogamp.opengl.GLEventListener;
+import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.util.Animator;
 
@@ -79,7 +83,9 @@ public class Example1 extends JFrame implements GLEventListener, KeyListener {
 		
 		// create an OpenGL canvas and add this as a listener
 		
-		this.canvas = new GLCanvas();
+		GLProfile profile = GLProfile.get(GLProfile.GL4);		 
+		GLCapabilities capabilities = new GLCapabilities(profile);
+		this.canvas = new GLCanvas(capabilities);
 		this.canvas.addGLEventListener(this);
 		this.add(canvas);
 		
@@ -114,6 +120,8 @@ public class Example1 extends JFrame implements GLEventListener, KeyListener {
 	public void init(GLAutoDrawable drawable) {
 		GL4 gl = (GL4) GLContext.getCurrentGL();
 		
+		System.err.println(gl.glGetString(GL.GL_VERSION));
+	
 		gl.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		gl.glClearDepth(1.0f);
 		gl.glEnable(GL_DEPTH_TEST);

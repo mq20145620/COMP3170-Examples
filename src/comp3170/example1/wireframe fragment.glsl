@@ -1,8 +1,12 @@
+#version 410
+
 uniform vec4 u_colour;
 uniform float u_width;
 
-varying vec3 v_barycentric;
-varying vec3 v_position;
+in vec3 v_barycentric;
+in vec3 v_position;
+
+layout(location = 0) out vec4 color;
 
 float edgeFactor(){
     vec3 d = fwidth(v_barycentric);
@@ -10,6 +14,6 @@ float edgeFactor(){
     return min(min(a3.x, a3.y), a3.z);
 }
 void main() {
-	gl_FragColor = mix(u_colour, vec4(0.0), edgeFactor());
+	color = mix(u_colour, vec4(0.0), edgeFactor());
 }
 
